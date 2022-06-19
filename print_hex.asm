@@ -26,6 +26,7 @@ HEX_OUT db '0x0000', 0          ; Template
 end:
     mov bx, HEX_OUT             ; Print HEX_OUT
     call print                  ;
+    call print_nl
 
     popa                        ; Put back the full stack
     ret                         ; Return back
