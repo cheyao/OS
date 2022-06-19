@@ -34,7 +34,6 @@ disk_error:
 
 sectors_error:
     mov bx, SECTORS_ERROR
-    call print_nl
     call print
 
 disk_loop:

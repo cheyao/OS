@@ -11,30 +11,23 @@ mov dh, 1                       ; from the boot disk.
 mov dl, [BOOT_DRIVE]
 call disk_load
 
-call print_nl
-mov bx, LOADING_32
-call print
-call print_nl
+mov dx, [0x9000]
+call print_hex
+
+mov dx, [0x9000 + 2]
+call print_hex
 
 jmp $
 
 %include 'print_hex.asm'
 %include 'print_string.asm'
 %include 'read.asm'
-%include 'gdt.asm'
-%include 'swich.asm'
-%include '32_bit_print.asm'
 
-LOADING_32: db 'Swiching to 32 bit mode...', 0
-SUCCESS: db 'Success'
 BOOT_DRIVE: db 0
-
-[bits 32]
-BEGIN_PM:
-    mov ebx, SUCCESS
-    call print_string_pm
-    jmp $
 
 ; Padding and magic BIOS number.
 times 510 -( $ - $$ ) db 0
 dw 0xaa55
+
+times 1 dw 0xdada
+times 1 dw 0xface
