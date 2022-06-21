@@ -15,7 +15,7 @@ hex_loop:
 step2:
     mov bx, HEX_OUT + 5         ; Add a offset
     sub bx, cx                  ; Subtract the counter
-    mov [bx], al              ; 
+    mov [bx], al                ; 
     ror dx, 4                   ; Rotate right (0x1234 -> 0x4123 -> 0x3412 -> 0x2341 -> 0x1234)
 
     add cx, 1                   ; Add one to counter

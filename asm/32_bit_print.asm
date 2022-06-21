@@ -25,18 +25,17 @@ print_string_pm_done:
     popa
     ret
 
-print_nl_pm:
+clear_sc:
     pusha
+    mov ecx, 0x7D0
+    mov al, ' '
     mov ah, WHITE_ON_BLACK
+clear_loop:
+    mov edx, VIDEO_MEMORY
+    add edx, ecx
+    add edx, ecx
 
-    mov al, 0x0a
-    mov [edx], ax ; store character + attribute in video memory
-    add ebx, 1 ; next char
-    add edx, 2 ; next video memory position
+    mov [edx], ax
 
-    mov al, 0x0d
-    mov [edx], ax ; store character + attribute in video memory
-    add ebx, 1 ; next char
-    add edx, 2 ; next video memory position
-    popa
-    ret
+    loop clear_loop
+    jmp print_string_pM_done

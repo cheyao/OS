@@ -6,10 +6,9 @@ mov [BOOT_DRIVE], dl            ; Save dl
 mov bp, 0x8000                  ; Stack
 mov sp, bp                      ;
 
-; mov bx, 0x9000                  ; Load 5 sectors to 0x0000:0x9000 (ES:BX)
-; mov dh, 1                       ; from the boot disk.
-; mov dl, [BOOT_DRIVE]
-; call disk_load
+mov ah, 0x01                       ; Remove cursor
+mov ch, 0x3F
+int 0x10
 
 call print_nl
 mov bx, LOADING_32
@@ -23,16 +22,19 @@ call switch_to_pm
 %include 'read.asm'
 %include 'gdt.asm'
 %include 'swich.asm'
+; 32 bit
 %include '32_bit_print.asm'
 
-LOADING_32: db 'Swiching to 32 bit mode...', 0
-SUCCESS: db 'Success', 0
+LOADING_32: db 'Swiching...', 0
+SUCCESS: db 'Booting...', 0
 BOOT_DRIVE: db 0
 
 [bits 32]
 BEGIN_PM:
+    call clear_sc
     mov ebx, SUCCESS
     call print_string_pm
+
     jmp $
 
 ; Padding and magic BIOS number.
