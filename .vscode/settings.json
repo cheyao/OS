@@ -1,0 +1,9 @@
+{
+    "files.associations": {
+        "*.S": "nasm",
+        "string": "c",
+        "iosfwd": "c",
+        "ports.h": "c",
+        "functions.h": "c"
+    }
+}
