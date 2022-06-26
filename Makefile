@@ -22,11 +22,11 @@ kernel.bin: boot/kernel_entry.o ${OBJ}
 kernel.elf: boot/kernel_entry.o ${OBJ}
 	x86_64-elf-ld -o $@ -Ttext 0x1000 $^ 
 
-run: clean os-image.bin
+run: os-image.bin
 	qemu-system-x86_64 -fda output/os-image.bin
 
 # Open the connection to qemu and load our kernel-object file with symbols
-debug: clean os-image.bin kernel.elf
+debug: os-image.bin kernel.elf
 	qemu-system-x86_64 -s -S -fda output/os-image.bin &
 	x86_64-elf-gdb -ex "target remote localhost:1234" -ex "symbol-file kernel.elf"
 
@@ -35,8 +35,8 @@ debug: clean os-image.bin kernel.elf
 %.o: %.c ${HEADERS}
 	x86_64-elf-gcc ${CFLAGS} -ffreestanding -c $< -o $@
 
-%.o: %.asm
-	nasm $< -f elf64 -o $@
+boot/kernel_entry.o: boot/kernel_entry.asm
+	nasm boot/kernel_entry.asm -f elf64 -o boot/kernel_entry.o
 
 %.bin: %.asm
 	nasm $< -f bin -o $@

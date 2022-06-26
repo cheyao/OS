@@ -1,9 +1,8 @@
 {
-    "files.associations": {
-        "*.S": "nasm",
-        "string": "c",
-        "iosfwd": "c",
-        "ports.h": "c",
-        "functions.h": "c"
-    }
+  "makefile.extensionOutputFolder": "./.vscode",
+  "files.associations": {
+    "*.S": "nasm",
+    "kernel.h": "c",
+    "functions.h": "c"
+  }
 }

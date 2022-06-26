@@ -2,32 +2,40 @@
 #include "../drivers/ports.h"
 
 /* Declaration of private functions */
-int get_cursor_offset();
-void set_cursor_offset(int offset);
-int print_char(char* c, int col, int row, char attr);
+void kprint(char* message, int offset);
 int get_offset(int col, int row);
 int get_offset_row(int offset);
 int get_offset_col(int offset);
 
-/**********************************************************
- * Public Kernel API functions                            *
- **********************************************************/
-
+// Prints at ___
 void print_at(char* message, int row, int col) {
-    int offset;
-    volatile char* sc = VIDEO_ADDRESS;
-    if (row < 0 && col < 0) {
-        offset = get_cursor_offset();
-        row = get_offset_row(offset);
-        col = get_offset_col(offset);
-    } else {
-        offset = row * 80 + col;
+    kprint(message, (row * 80 + col) * 2);
+}
+
+// Prints at cursor position
+void print(char* message) {
+    kprint(message, get_cursor_offset());
+}
+
+// Real print function
+void kprint(char* message, int offset) {
+    // Stores sc position (0xb8000)
+    volatile char* sc = (volatile char*) VIDEO_ADDRESS;
+
+    // adds the offset to sc
+    sc += offset;
+
+    // While the char isnt 0x00, prints the char
+    while (*message != 0) {
+        *sc = *message;
+        sc += 2;
+        message++;
     }
 
-    while (*message != 0) {
-        sc += offset;
-        *sc = *message;
-    }
+    // Gets the offset and moves it one more letter
+    offset = sc - VIDEO_ADDRESS + 2;
+    // Sets the cursor position
+    set_cursor_offset(offset);
 }
 
 int get_cursor_offset() {
@@ -36,14 +44,13 @@ int get_cursor_offset() {
      * 2. Ask for low byte (data 15)
      */
     outb(REG_SCREEN_CTRL, 14);
-    int offset = inb(REG_SCREEN_DATA) << 8; /* High byte: << 8 */
+    int offset = inb(REG_SCREEN_DATA) << 8; // High byte
     outb(REG_SCREEN_CTRL, 15);
-    offset += inb(REG_SCREEN_DATA);
-    return offset * 2; /* Position * size of character cell */
+    offset += inb(REG_SCREEN_DATA); // Low byte
+    return offset * 2; // Position * size of character cell
 }
 
 void set_cursor_offset(int offset) {
-    /* Similar to get_cursor_offset, but instead of reading we write data */
     offset /= 2;
     outb(REG_SCREEN_CTRL, 14);
     outb(REG_SCREEN_DATA, (unsigned char)(offset >> 8));
@@ -51,18 +58,32 @@ void set_cursor_offset(int offset) {
     outb(REG_SCREEN_DATA, (unsigned char)(offset & 0xff));
 }
 
-void clear_sc() {
-    volatile char* screen = VIDEO_ADDRESS;
-    int screen_size = MAX_COLS * MAX_ROWS;
-    int i = 0;
+void enable_cursor(int cursor_start, int cursor_end) {
+	outb(0x3D4, 0x0A);
+	outb(0x3D5, (inb(0x3D5) & 0xC0) | cursor_start);
+ 
+	outb(0x3D4, 0x0B);
+	outb(0x3D5, (inb(0x3D5) & 0xE0) | cursor_end);
+}
 
-    for (screen = VIDEO_ADDRESS; screen < VIDEO_ADDRESS + screen_size; screen ++) {
+void disable_cursor()
+{
+	outb(0x3D4, 0x0A);
+	outb(0x3D5, 0x20);
+}
+
+
+void clear_sc() {
+    volatile char* screen;
+    int screen_size = MAX_COLS * MAX_ROWS;
+
+    for (screen = (volatile char *) VIDEO_ADDRESS; (int) screen < VIDEO_ADDRESS + screen_size; screen ++) {
         *screen = ' ';
         screen ++;
         *screen = WHITE_ON_BLACK;
     }
 
-    set_cursor_offset(get_offset(0, 0));
+    set_cursor_offset(0x00);
 }
 
 

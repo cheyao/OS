@@ -4,9 +4,8 @@
 
 void main() {
     clear_sc();
+    enable_cursor(1, 13);
 
-    // print_at("H", 0, 0);
-    volatile char* message = 'H';
-    volatile char* sc = 0xb8001;
-    *sc = 'H';
+    print("Hello, world!"); // Prints very well
+    print("Never gonna give you up"); // Dosn't print anything and moves the cursor one letter before?????????????
 }
