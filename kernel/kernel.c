@@ -1,11 +1,12 @@
-#include "../drivers/ports.h"
 #include "functions.h"
-#include "kernel.h"
+#include "../cpu/isr.h"
 
 void main() {
-    clear_sc();
+    clear_screen();
     enable_cursor(1, 13);
+    isr_install();
 
-    print("Hello, world!"); // Prints very well
-    print("Never gonna give you up"); // Dosn't print anything and moves the cursor one letter before?????????????
+    kprint("usr $ ");
+    kprint("brew install macOS\nUpdating brew...");
+    __asm__ ("int $0x01");
 }
