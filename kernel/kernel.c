@@ -8,5 +8,5 @@ void main() {
 
     kprint("usr $ ");
     kprint("brew install macOS\nUpdating brew...");
-    __asm__ ("int $0x01");
+    __asm__ __volatile__ ("int $2");
 }
