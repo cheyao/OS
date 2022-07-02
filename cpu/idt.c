@@ -1,22 +1,29 @@
-//
-// Created by cyao1234 on 30.06.2022.
-//
-
 #include "idt.h"
-idt_gate_t idt[IDT_ENTRIES];
-idt_register_t idt_reg;
 
-void set_idt_gate(int n, u32int handler) {
-    idt[n].low_offset = low_16(handler);
-    idt[n].sel = KERNEL_CS;
-    idt[n].always0 = 0;
-    idt[n].flags = 0x8E;
-    idt[n].high_offset = high_16(handler);
+static idtr_t idtr;
+__attribute__((aligned(0x10)))
+static idt_entry_t idt[256];
+
+void idt_set_descriptor(u8int vector, void* isr, u8int flags) {
+    idt_entry_t* descriptor = &idt[vector];
+
+    descriptor->isr_low        = (u32int)isr & 0xFFFF;
+    descriptor->kernel_cs      = 0x08; // this value can be whatever offset your kernel code selector is in your GDT
+    descriptor->attributes     = flags;
+    descriptor->isr_high       = (u32int)isr >> 16;
+    descriptor->reserved       = 0;
 }
 
-void set_idt() {
-    idt_reg.base = (u32int) &idt;
-    idt_reg.limit = IDT_ENTRIES * sizeof(idt_gate_t) - 1;
-    /* Don't make the mistake of loading &idt -- always load &idt_reg */
-    __asm__ __volatile__("lidt (%0)" : : "r" (&idt_reg));
+extern void* isr_stub_table[];
+
+void idt_init() {
+    idtr.size   = (u16int) sizeof(idt_entry_t) - 1;
+    idtr.offset = (u32int) &idt[0];
+
+    for (u8int vector = 0; vector < 32; vector++) {
+        idt_set_descriptor(vector, isr_stub_table[vector], 0x8E);
+    }
+
+    __asm__ __volatile__ ("lidt %0" : : "m"(idtr)); // load the new IDT
+    __asm__ __volatile__ ("sti"); // set the interrupt flag
 }

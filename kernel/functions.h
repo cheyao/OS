@@ -1,6 +1,7 @@
 #ifndef FUNCTIONS_H
 
-#include "../cpu/types.h"
+#include <stddef.h>
+#include "types.h"
 
 #define FUNCTIONS_H
 #define VIDEO_ADDRESS 0xb8000
@@ -20,6 +21,11 @@ void enable_cursor(int cursor_start, int cursor_end);
 int get_cursor_offset();
 void set_cursor_offset(int offset);
 void scroll();
+void * memset (void *dest, int val, size_t len);
+void * memmove (void *dest, const void *src, size_t len);
+void * memcpy (void *dest, const void *src, size_t len);
+int memcmp (const void *str1, const void *str2, size_t count);
 void kprint_hex(u8int hex);
 void int_to_ascii(int n, char str[]);
+char * itoa(int value, int digits);
 #endif

@@ -1,37 +1,30 @@
-#ifndef IDT_H
-#define IDT_H
+//
+// Created by cyao on 01.07.2022.
+// Fuck all tutorials im going to write this by my self
+//
 
-#include "types.h"
+#ifndef OS_IDT_H
+#define OS_IDT_H
 
-/* Segment selectors */
-#define KERNEL_CS 0x08
+#include "../kernel/types.h"
 
-/* How every interrupt gate (handler) is defined */
+#define IDT_MAX_DESCRIPTORS 256
+
 typedef struct {
-    u16int low_offset; /* Lower 16 bits of handler function address */
-    u16int sel; /* Kernel segment selector */
-    u8int always0;
-    /* First byte
-     * Bit 7: "Interrupt is present"
-     * Bits 6-5: Privilege level of caller (0=kernel..3=user)
-     * Bit 4: Set to 0 for interrupt gates
-     * Bits 3-0: bits 1110 = decimal 14 = "32 bit interrupt gate" */
-    u8int flags;
-    u16int high_offset; /* Higher 16 bits of handler function address */
-} __attribute__((packed)) idt_gate_t ;
+    u16int      isr_low;      // The lower 16 bits of the ISR's address
+    u16int      kernel_cs;    // The GDT segment selector that the CPU will load into CS before calling the ISR
+    u8int       reserved;     // Set to zero
+    u8int       attributes;   // Type and attributes; see the IDT page 0x8e
+    u16int      isr_high;     // The higher 16 bits of the ISR's address
+} __attribute__((packed)) idt_entry_t;
 
-/* A pointer to the array of interrupt handlers.
- * Assembly instruction 'lidt' will read it */
 typedef struct {
-    u16int limit;
-    u32int base;
-} __attribute__((packed)) idt_register_t;
+    u16int 	    size;
+    u32int 	    offset;
+} __attribute__((packed)) idtr_t;
 
-#define IDT_ENTRIES 256
+void idt_set_descriptor(u8int vector, void* isr, u8int flags);
+void idt_init(void);
 
-
-/* Functions implemented in idt.c */
-void set_idt_gate(int n, u32int handler);
-void set_idt();
 
 #endif

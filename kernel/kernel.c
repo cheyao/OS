@@ -1,12 +1,11 @@
 #include "functions.h"
-#include "../cpu/isr.h"
+#include "../cpu/idt.h"
 
 void main() {
     clear_screen();
     enable_cursor(1, 13);
-    isr_install();
+    idt_init();
 
-    kprint("usr $ ");
-    kprint("brew install macOS\nUpdating brew...");
-    __asm__ __volatile__ ("int $2");
+    //kprint("usr $ ");
+    //kprint("brew install macOS\nUpdating brew...");
 }

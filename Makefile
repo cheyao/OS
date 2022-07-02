@@ -1,7 +1,7 @@
 C_SOURCES = $(wildcard kernel/*.c drivers/*.c cpu/*.c)
 HEADERS = $(wildcard kernel/*.h drivers/*.h cpu/*.h)
 # Nice syntax for file extension replacement
-OBJ = ${C_SOURCES:.c=.o cpu/interrupt.o}
+OBJ = ${C_SOURCES:.c=.o cpu/int.o}
 # -g: Use debugging symbols in gcc
 CFLAGS = -g
 
@@ -23,11 +23,11 @@ kernel.elf: boot/kernel_entry.o ${OBJ}
 	x86_64-elf-ld -o $@ -Ttext 0x1000 $^
 
 run: os-image.bin
-	qemu-system-x86_64 -fda output/os-image.bin
+	qemu-system-x86_64 -fda output/os-image.bin -no-reboot -D ./log.txt -d strace
 
 # Open the connection to qemu and load our kernel-object file with symbols
 debug: os-image.bin kernel.elf
-	qemu-system-x86_64 -s -S -fda output/os-image.bin &
+	qemu-system-x86_64 -s -S -fda output/os-image.bin -no-reboot &
 	x86_64-elf-gdb -ex "target remote localhost:1234" -ex "symbol-file kernel.elf"
 
 # Generic rules for wildcards
