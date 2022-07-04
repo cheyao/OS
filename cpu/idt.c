@@ -17,7 +17,7 @@ void idt_set_descriptor(u8int vector, void* isr, u8int flags) {
 extern void* isr_stub_table[];
 
 void idt_init() {
-    idtr.size   = (u16int) sizeof(idt_entry_t) - 1;
+    idtr.size   = (u16int) sizeof(idt_entry_t) * 32 - 1;
     idtr.offset = (u32int) &idt[0];
 
     for (u8int vector = 0; vector < 32; vector++) {
