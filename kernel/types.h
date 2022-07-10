@@ -1,7 +1,3 @@
-//
-// Created by Cyao1234 on 30.06.2022.
-//
-
 #ifndef OS_TYPES_H
 #define OS_TYPES_H
 

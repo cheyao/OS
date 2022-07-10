@@ -3,11 +3,9 @@ HEADERS = $(wildcard kernel/*.h drivers/*.h cpu/*.h)
 # Nice syntax for file extension replacement
 OBJ = ${C_SOURCES:.c=.o cpu/int.o}
 # -g: Use debugging symbols in gcc
-CFLAGS = -g
+CFLAGS = -g3
 
 all: run
-	-rm -rf *.bin *.dis *.o *.elf
-	-rm -rf kernel/*.o boot/*.bin drivers/*.o boot/*.o  drivers/*.o cpu/*.o cpu/*.bin
 
 # First rule is run by default
 os-image.bin: boot/bootsect.bin kernel.bin
@@ -23,7 +21,7 @@ kernel.elf: boot/kernel_entry.o ${OBJ}
 	x86_64-elf-ld -o $@ -Ttext 0x1000 $^
 
 run: os-image.bin
-	qemu-system-x86_64 -fda output/os-image.bin -no-reboot -D ./log.txt -d strace
+	qemu-system-x86_64 -fda output/os-image.bin -no-reboot # -d cpu -D ./log.txt
 
 # Open the connection to qemu and load our kernel-object file with symbols
 debug: os-image.bin kernel.elf

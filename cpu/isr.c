@@ -1,14 +1,8 @@
-//
-// Created by cyao on 02.07.2022.
-//
-
 #include "isr.h"
 #include "../kernel/functions.h"
 
-
-void exception_handler(u8int exception) {
-    char* i = "0";
-    kprint("Recieved interupt: ");
-    *i += exception;
-    kprint(i);
+void int_handler(u8int exception) {
+    char* str = "0";    // Turns one digit ints to strings, enough for now
+    *str += exception;
+    kprint(str);// Prints the int
 }
