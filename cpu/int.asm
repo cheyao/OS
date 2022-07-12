@@ -1,31 +1,30 @@
 [BITS 32]
+[EXTERN int_handler]
 
-extern int_handler
+int_get:
+    ; 1. Call C handler
+	call int_handler
+
+    ; 2. Restore state
+	add esp, 8 ; Cleans up the pushed error code and pushed ISR number
+	;sti
+	iret ; pops 5 things at once: CS, EIP, EFLAGS, SS, and ESP
 
 %macro isr_err 1
 GLOBAL isr_%1
 isr_%1:
-    ; Dosn't even touch the stack so there should be no problem
-    ;pusha
-
-    ;push byte %1
-    call int_handler
-
-    ;popa
-    iret
+    cli
+    push %1
+    call int_get
 %endmacro
 
 %macro isr_no_err 1
 GLOBAL isr_%1
 isr_%1:
-    ; Dosn't even touch the stack so there should be no problem
-    ;pusha
-
-    ;push byte %1
-    call int_handler
-
-    ;popa
-    iret
+    cli
+    push 0
+    push %1
+    call int_get
 %endmacro
 
 isr_no_err 0

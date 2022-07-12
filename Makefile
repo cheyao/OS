@@ -3,7 +3,9 @@ HEADERS = $(wildcard kernel/*.h drivers/*.h cpu/*.h)
 # Nice syntax for file extension replacement
 OBJ = ${C_SOURCES:.c=.o cpu/int.o}
 # -g: Use debugging symbols in gcc
-CFLAGS = -g3
+CFLAGS = -g3 -Wall -Wextra -pedantic
+
+.PHONY: clean all run debug
 
 all: run
 
@@ -28,6 +30,11 @@ debug: os-image.bin kernel.elf
 	qemu-system-x86_64 -s -S -fda output/os-image.bin -no-reboot &
 	x86_64-elf-gdb -ex "target remote localhost:1234" -ex "symbol-file kernel.elf"
 
+clean:
+	-rm -rf *.bin *.dis *.o os-image.bin *.elf
+	-rm -rf kernel/*.o boot/*.bin drivers/*.o boot/*.o  drivers/*.o cpu/*.o cpu/*.bin
+
+
 # Generic rules for wildcards
 # To make an object, always compile from its .c
 %.o: %.c ${HEADERS}
@@ -41,8 +48,3 @@ boot/kernel_entry.o: boot/kernel_entry.asm
 
 %.bin: %.asm
 	nasm $< -f bin -o $@
-
-clean:
-	-rm -rf *.bin *.dis *.o os-image.bin *.elf
-	-rm -rf kernel/*.o boot/*.bin drivers/*.o boot/*.o  drivers/*.o cpu/*.o cpu/*.bin
-

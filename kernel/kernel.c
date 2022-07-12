@@ -2,14 +2,12 @@
 #include "../cpu/idt.h"
 
 void main() {
-    //clear_screen();
-    //enable_cursor(1, 13);
-    //kprint("usr $ ");
+    clear_screen();
+    enable_cursor(1, 13);
     init_idt(); //Initialises the IDT
 
-    __asm__ __volatile__ ("int $10"); // CPU Panics here
-
-    // Problem: CPU Panics when getting a interrupt
+    kprint("usr $ ");
+    __asm__ __volatile__ ("int $1"); // CPU Panics here
 
     /* Files:
      * int handeler:    cpu/isr.c   https://github.com/cheyao/OS/blob/master/cpu/isr.c
