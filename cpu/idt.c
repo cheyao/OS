@@ -4,7 +4,7 @@ static idt_t  idt[31];   // Defines 32 idts
 static idtr_t idtr;      // Makes a idtr
 
 void set_idt(int vector, u32int offset) {
-    vector -= 11; // Used gdb to debug, the idt[vector] always points to the idt that is 11 farther
+    //vector -= 11; // Used gdb to debug, the idt[vector] always points to the idt that is 11 farther
     idt[vector].high        = high_16(offset);  // (u16int)((offset) & 0xFFFF)
     idt[vector].selector    = 0x08;             // Sector
     idt[vector].zero        = 0;                // Reserved
