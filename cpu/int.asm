@@ -2,29 +2,25 @@
 [EXTERN int_handler]
 
 int_get:
-    ; 1. Call C handler
+    SAVE_REGS
 	call int_handler
-
-    ; 2. Restore state
-	add esp, 8 ; Cleans up the pushed error code and pushed ISR number
-	;sti
-	iret ; pops 5 things at once: CS, EIP, EFLAGS, SS, and ESP
+    RESTORE_REGS
+    add esp, 8     ; deallocate the error code and the interrupt number
+    iret           ; pops CS, EIP, EFLAGS and also SS, and ESP if privilege change occurs
 
 %macro isr_err 1
 GLOBAL isr_%1
 isr_%1:
-    cli
     push %1
-    call int_get
+    jmp int_get
 %endmacro
 
 %macro isr_no_err 1
 GLOBAL isr_%1
 isr_%1:
-    cli
     push 0
     push %1
-    call int_get
+    jmp int_get
 %endmacro
 
 isr_no_err 0
@@ -59,3 +55,27 @@ isr_no_err 28
 isr_no_err 29
 isr_err    30
 isr_no_err 31
+
+%macro	SAVE_REGS 0
+        pushad
+        push ds ;those registers are 16 bit but they are pushed as 32 bits here
+        push es
+        push fs
+        push gs
+
+        push ebx
+        mov bx, 0x10 ; load the kernel data segment descriptor
+        mov ds, bx
+        mov es, bx
+        mov fs, bx
+        mov gs, bx
+        pop ebx
+%endmacro
+
+%macro	RESTORE_REGS 0
+        pop gs
+        pop fs
+        pop es
+        pop ds
+        popad
+%endmacro
