@@ -7,21 +7,21 @@ gdt_start: ; don't remove the labels, they're needed to compute sizes and jumps
 ; for flags, refer to os-dev.pdf document, page 36
 gdt_code: 
     dw 0xffff    ; segment length, bits 0-15
-    dw 0x0       ; segment base, bits 0-15
-    db 0x0       ; segment base, bits 16-23
+    dw 0x0000    ; segment base, bits 0-15
+    db 0x00      ; segment base, bits 16-23
     db 10011010b ; flags (8 bits)
     db 11001111b ; flags (4 bits) + segment length, bits 16-19
-    db 0x0       ; segment base, bits 24-31
+    db 0x00      ; segment base, bits 24-31
 
 ; GDT for data segment. base and length identical to code segment
 ; some flags changed, again, refer to os-dev.pdf
 gdt_data:
     dw 0xffff
-    dw 0x0
-    db 0x0
+    dw 0x0000
+    db 0x00
     db 10010010b
     db 11001111b
-    db 0x0
+    db 0x00
 
 gdt_end:
 

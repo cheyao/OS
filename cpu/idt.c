@@ -1,7 +1,10 @@
 #include "idt.h"
 
+__attribute__((aligned(8)))
 static idt_t  idt[31];   // Defines 32 idts
 static idtr_t idtr;      // Makes a idtr
+
+extern void flush_idt(u32int idt);
 
 void set_idt(int vector, u32int offset) {
     //vector -= 11; // Used gdb to debug, the idt[vector] always points to the idt that is 11 farther
@@ -49,6 +52,6 @@ void init_idt() {
 
     idtr.base  = (u32int) &idt[0];              // Assigns the position of idt[0] to idtr.base
     idtr.limit = sizeof(idt_t) * 32 - 1;        // According to the intel IA-32 manuel, all idts are 8 bytes big
-
-    __asm__ __volatile__ ("lidt %0" :: "m" (idtr)); // Loads the IDTR
+    flush_idt((u32int) &idtr);
+    //__asm__ __volatile__ ("lidt %0" :: "m" (idtr)); // Loads the IDTR
 }

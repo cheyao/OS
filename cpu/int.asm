@@ -79,3 +79,9 @@ isr_no_err 31
         pop ds
         popad
 %endmacro
+
+global flush_idt
+flush_idt:
+    mov eax, [esp + 4]
+    lidt [eax]
+    ret

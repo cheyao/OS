@@ -7,7 +7,7 @@ void main() {
     init_idt(); //Initialises the IDT, all good
 
     kprint("usr $ ");
-    __asm__ __volatile__ ("int $1"); // CPU Panics here
+    __asm__ __volatile__ ("int $0"); // CPU Panics here
 
     /* Files:
      * gdt:             boot/gdt.asm https://github.com/cheyao/OS/blob/master/boot/gdt.asm
