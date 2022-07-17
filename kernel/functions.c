@@ -1,6 +1,5 @@
 #include "functions.h"
 #include "../drivers/ports.h"
-#include <stddef.h>
 
 /* Declaration of private functions */
 int print_char(char c, int offset, char attr);
@@ -31,14 +30,16 @@ void kprint_at(const char *message, int col, int row) {
         message++;
     }
 
-    if (offset > MAX_COLS * MAX_ROWS * 2) {
-        scroll();
+    if (col < 0 || row < 0) {
+        set_cursor_offset(offset);
+
+        if (offset > MAX_COLS * MAX_ROWS * 2) {
+            scroll();
+        }
     }
 }
 
 void kprint(char *message) {
-    message++;
-
     kprint_at(message, -1, -1);
 }
 
@@ -66,8 +67,6 @@ int print_char(const char c, int offset, char attr) {
         vidmem[offset++] = c;
         vidmem[offset++] = attr;
     }
-
-    set_cursor_offset(offset);
 
     return offset;
 }
@@ -111,7 +110,7 @@ void scroll() {
     volatile char* video_memory = (volatile char *) VIDEO_ADDRESS;
     volatile char* video_memory_80 = (volatile char *) VIDEO_ADDRESS + 160;
 
-    while (video_memory < VIDEO_ADDRESS + MAX_COLS * MAX_ROWS * 2) {
+    while ((int) video_memory < VIDEO_ADDRESS + MAX_COLS * MAX_ROWS * 2) {
         *video_memory = *video_memory_80;
         video_memory_80++;
         video_memory++;
@@ -148,7 +147,9 @@ int max(int i, int j) {
 int get_offset_row(int offset) { return offset / (2 * 80); }
 int get_offset_col(int offset) { return (int) ((offset - (get_offset_row(offset)*2))/2); }
 
-
+/**
+ * K&R implementation
+ */
 void int_to_ascii(int n, char str[]) {
     int i, sign;
     if ((sign = n) < 0) n = -n;
@@ -159,46 +160,62 @@ void int_to_ascii(int n, char str[]) {
 
     if (sign < 0) str[i++] = '-';
     str[i] = '\0';
+
+    reverse(str);
 }
 
-void * memset (void *dest, int val, size_t len) {
-    unsigned char *ptr = dest;
-    while (len-- > 0)
-        *ptr++ = val;
-    return dest;
-}
-
-void * memmove (void *dest, const void *src, size_t len) {
-    char *d = dest;
-    const char *s = src;
-    if (d < s)
-        while (len--)
-            *d++ = *s++;
-    else
-    {
-        char *lasts = s + (len-1);
-        char *lastd = d + (len-1);
-        while (len--)
-            *lastd-- = *lasts--;
+/* K&R */
+void reverse(char s[]) {
+    int c, i, j;
+    for (i = 0, j = strlen(s)-1; i < j; i++, j--) {
+        c = s[i];
+        s[i] = s[j];
+        s[j] = c;
     }
-    return dest;
 }
 
-void * memcpy (void *dest, const void *src, size_t len) {
-    char *d = dest;
-    const char *s = src;
-    while (len--)
-        *d++ = *s++;
-    return dest;
+/* K&R */
+int strlen(char s[]) {
+    int i = 0;
+    while (s[i] != '\0') ++i;
+    return i;
 }
 
-int memcmp (const void *str1, const void *str2, size_t count) {
-    const unsigned char *s1 = str1;
-    const unsigned char *s2 = str2;
+/* Deletes the item before the cursor on the screen */
+void kdel() {
+    kdel_at(-1, -1);
+}
 
-    while (count-- > 0) {
-        if (*s1++ != *s2++)
-            return s1[-1] < s2[-1] ? -1 : 1;
+
+void kdel_at(int row, int col) {
+    /* Set cursor if col/row are negative */
+    int offset;
+
+    if (col >= 0 && row >= 0) offset = get_offset(col, row);
+    else offset = get_cursor_offset();
+
+    *((char*) VIDEO_ADDRESS + offset - 2) = ' ';
+
+    if (col < 0 || row < 0) {
+        set_cursor_offset(offset - 2);
     }
-    return 0;
+}
+
+void append(char l[], char letter) {
+    int i;
+    for (i = 0; l[i] != 0; i++) {}
+    l[i] = letter;
+    i++;
+    l[i] = 0;
+}
+
+char pop(char l[]) {
+    int i;
+    char tmp;
+    for (i = 0; l[i] != 0; i++) {}
+    if (i == 0) return 0;
+    i--;
+    tmp = l[i];
+    l[i] = 0;
+    return tmp;
 }

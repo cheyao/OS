@@ -1,6 +1,5 @@
 #ifndef FUNCTIONS_H
 
-#include <stddef.h>
 #include "types.h"
 
 #define FUNCTIONS_H
@@ -17,15 +16,22 @@
 void clear_screen();
 void kprint_at(const char *message, int col, int row);
 void kprint(char *message);
+void kdel();
+void kdel_at(int row, int col);
 void enable_cursor(int cursor_start, int cursor_end);
 int get_cursor_offset();
 void set_cursor_offset(int offset);
 void scroll();
-void * memset (void *dest, int val, size_t len);
-void * memmove (void *dest, const void *src, size_t len);
-void * memcpy (void *dest, const void *src, size_t len);
-int memcmp (const void *str1, const void *str2, size_t count);
-void kprint_hex(u8int hex);
+void * memset (void *dest, int val, u32int len);
+void * memmove (void *dest, const void *src, u32int len);
+void * memcpy (void *dest, const void *src, u32int len);
+int memcmp (const void *str1, const void *str2, u32int count);
 void int_to_ascii(int n, char str[]);
-char * itoa(int value, int digits);
+void reverse(char s[]);
+int strlen(char s[]);
+void append(char l[], char letter);
+char pop(char l[]);
+
+#define UNUSED(x) (void)(x)
+
 #endif

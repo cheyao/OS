@@ -1,13 +1,10 @@
 #include "idt.h"
-
-__attribute__((aligned(8)))
-static idt_t  idt[31];   // Defines 32 idts
-static idtr_t idtr;      // Makes a idtr
+#include "../drivers/ports.h"
+#include "../kernel/functions.h"
 
 extern void flush_idt(u32int idt);
 
 void set_idt(int vector, u32int offset) {
-    //vector -= 11; // Used gdb to debug, the idt[vector] always points to the idt that is 11 farther
     idt[vector].low         = low_16(offset);   // (u16int)(((offset) >> 16) & 0xFFFF)
     idt[vector].selector    = 0x08;             // Sector
     idt[vector].zero        = 0;                // Reserved
@@ -16,6 +13,19 @@ void set_idt(int vector, u32int offset) {
 }
 
 void init_idt() {
+
+    // Remap the PIC
+    outb(0x20, 0x11);
+    outb(0xA0, 0x11);
+    outb(0x21, 0x20);
+    outb(0xA1, 0x28);
+    outb(0x21, 0x04);
+    outb(0xA1, 0x02);
+    outb(0x21, 0x01);
+    outb(0xA1, 0x01);
+    outb(0x21, 0x0);
+    outb(0xA1, 0x0);
+
     // Wrote these functions by hand to avoid errors
     set_idt(0 , (u32int) isr_0 );
     set_idt(1 , (u32int) isr_1 );
@@ -30,7 +40,7 @@ void init_idt() {
     set_idt(10, (u32int) isr_10);
     set_idt(11, (u32int) isr_11);
     set_idt(12, (u32int) isr_12);
-    set_idt(13, (u32int) isr_13);
+    set_idt(13, (u32int) isr_13); // Clock points to here????????????????????????
     set_idt(14, (u32int) isr_14);
     set_idt(15, (u32int) isr_15);
     set_idt(16, (u32int) isr_16);
@@ -50,8 +60,28 @@ void init_idt() {
     set_idt(30, (u32int) isr_30);
     set_idt(31, (u32int) isr_31);
 
+    // Install the IRQs
+    set_idt(32, (u32int)irq_0 );
+    set_idt(33, (u32int)irq_1 );
+    set_idt(34, (u32int)irq_2 );
+    set_idt(35, (u32int)irq_3 );
+    set_idt(36, (u32int)irq_4 );
+    set_idt(37, (u32int)irq_5 );
+    set_idt(38, (u32int)irq_6 );
+    set_idt(39, (u32int)irq_7 );
+    set_idt(40, (u32int)irq_8 );
+    set_idt(41, (u32int)irq_9 );
+    set_idt(42, (u32int)irq_10);
+    set_idt(43, (u32int)irq_11);
+    set_idt(44, (u32int)irq_12);
+    set_idt(45, (u32int)irq_13);
+    set_idt(46, (u32int)irq_14);
+    set_idt(47, (u32int)irq_15);
+
     idtr.base  = (u32int) &idt[0];              // Assigns the position of idt[0] to idtr.base
-    idtr.limit = sizeof(idt_t) * 32 - 1;        // According to the intel IA-32 manuel, all idts are 8 bytes big
+    idtr.limit = sizeof(idt_t) * 256 - 1;        // According to the intel IA-32 manuel, all idts are 8 bytes big
+
     flush_idt((u32int) &idtr);
-    //__asm__ __volatile__ ("lidt %0" :: "m" (idtr)); // Loads the IDTR
+    UNUSED(idtr);
 }
+

@@ -1,16 +1,21 @@
 [BITS 32]
 [EXTERN int_handler]
+[EXTERN irq_handler]
 
 int_get:
-    SAVE_REGS
 	call int_handler
-    RESTORE_REGS
     add esp, 8     ; deallocate the error code and the interrupt number
     iret           ; pops CS, EIP, EFLAGS and also SS, and ESP if privilege change occurs
+
+irq_get:
+    call irq_handler
+    add esp, 8
+    iret
 
 %macro isr_err 1
 GLOBAL isr_%1
 isr_%1:
+    cli
     push %1
     jmp int_get
 %endmacro
@@ -18,9 +23,19 @@ isr_%1:
 %macro isr_no_err 1
 GLOBAL isr_%1
 isr_%1:
+    cli
     push 0
     push %1
     jmp int_get
+%endmacro
+
+%macro irq 2
+GLOBAL irq_%1
+irq_%1:
+    cli
+    push %1
+    push %2
+    jmp irq_get
 %endmacro
 
 isr_no_err 0
@@ -55,30 +70,22 @@ isr_no_err 28
 isr_no_err 29
 isr_err    30
 isr_no_err 31
-
-%macro	SAVE_REGS 0
-        pushad
-        push ds ;those registers are 16 bit but they are pushed as 32 bits here
-        push es
-        push fs
-        push gs
-
-        push ebx
-        mov bx, 0x10 ; load the kernel data segment descriptor
-        mov ds, bx
-        mov es, bx
-        mov fs, bx
-        mov gs, bx
-        pop ebx
-%endmacro
-
-%macro	RESTORE_REGS 0
-        pop gs
-        pop fs
-        pop es
-        pop ds
-        popad
-%endmacro
+irq 0, 32
+irq 1, 33
+irq 2, 34
+irq 3, 35
+irq 4, 36
+irq 5, 37
+irq 6, 38
+irq 7, 39
+irq 8, 40
+irq 9, 41
+irq 10, 42
+irq 11, 43
+irq 12, 44
+irq 13, 45
+irq 14, 46
+irq 15, 47
 
 global flush_idt
 flush_idt:
