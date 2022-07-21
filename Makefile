@@ -3,8 +3,8 @@ HEADERS = $(wildcard kernel/*.h drivers/*.h cpu/*.h)
 # Nice syntax for file extension replacement
 OBJ = ${C_SOURCES:.c=.o cpu/int.o}
 # -g: Use debugging symbols in gcc
-CFLAGS = -g3 -m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector -nostartfiles -nodefaultlibs \
-                  		 -Wall -Wextra -Werror
+CFLAGS = -g3 -nostdlib -nostdinc -fno-builtin -fno-stack-protector -nostartfiles -nodefaultlibs \
+                  		 -Wall -Wextra -Werror -I /Users/ray/OS
 
 .PHONY: clean all run debug
 
@@ -17,11 +17,11 @@ os-image.bin: boot/bootsect.bin kernel.bin
 # '--oformat binary' deletes all symbols as a collateral, so we don't need
 # to 'strip' them manually on this case
 kernel.bin: boot/kernel_entry.o ${OBJ}
-	x86_64-elf-ld -melf_i386 -o $@ -Ttext 0x1000 $^ --oformat binary
+	i686-elf-ld -o $@ -Ttext 0x1000 $^ --oformat binary
 
 # Used for debugging purposes
 kernel.elf: boot/kernel_entry.o ${OBJ}
-	x86_64-elf-ld -melf_i386 -o $@ -Ttext 0x1000 $^
+	i686-elf-ld -o $@ -Ttext 0x1000 $^
 
 run: os-image.bin
 	qemu-system-x86_64 -fda output/os-image.bin -no-reboot -D ./log.txt -d int
@@ -39,13 +39,10 @@ clean:
 # Generic rules for wildcards
 # To make an object, always compile from its .c
 %.o: %.c ${HEADERS}
-	x86_64-elf-gcc ${CFLAGS} -ffreestanding -c $< -o $@
+	i686-elf-gcc ${CFLAGS} -ffreestanding -c $< -o $@
 
 %.o: %.asm
 	nasm $< -f elf32 -o $@
-
-boot/kernel_entry.o: boot/kernel_entry.asm
-	nasm boot/kernel_entry.asm -f elf32 -o boot/kernel_entry.o
 
 %.bin: %.asm
 	nasm $< -f bin -o $@

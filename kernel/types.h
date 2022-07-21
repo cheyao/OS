@@ -9,6 +9,11 @@ typedef unsigned char  u8int;
 typedef          char  s8int;
 
 
+typedef _Bool bool;
+
+#define True  1;
+#define False 0;
+
 #define low_16(address) (u16int)((address) & 0xFFFF)
 #define high_16(address) (u16int)(((address) >> 16) & 0xFFFF)
 

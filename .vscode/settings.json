@@ -1,8 +1,0 @@
-{
-  "makefile.extensionOutputFolder": "./.vscode",
-  "files.associations": {
-    "*.S": "nasm",
-    "kernel.h": "c",
-    "functions.h": "c"
-  }
-}

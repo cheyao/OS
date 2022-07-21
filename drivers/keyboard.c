@@ -1,9 +1,9 @@
-#include "../cpu/idt.h"
-#include "../cpu/isr.h"
-#include "../kernel/bash.h"
-#include "../kernel/functions.h"
-#include "keyboard.h"
-#include "ports.h"
+#include "cpu/idt.h"
+#include "cpu/isr.h"
+#include "kernel/bash.h"
+#include "kernel/functions.h"
+#include "drivers/keyboard.h"
+#include "drivers/ports.h"
 
 #define BACKSPACE 0x0E
 #define ENTER 0x1C
@@ -42,7 +42,7 @@ static void keyboard_callback(u8int int_no) {
     else if (scancode == ENTER) {
         kprint("\n");
         run(key_buffer);
-        key_buffer[0] = 0;
+        memset(key_buffer, 0, sizeof key_buffer);
     }
     else if (scancode == 0x2A || scancode == 0x36) shift = 1;
     else if (scancode == 0x2A + 0x80 || scancode == 0x36 + 0x80) shift = 0;

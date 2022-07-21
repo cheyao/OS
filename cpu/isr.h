@@ -1,7 +1,7 @@
 #ifndef OS_ISR_H
 #define OS_ISR_H
 
-#include "../kernel/types.h"
+#include "kernel/types.h"
 
 
 void int_handler(u8int int_no, u8int err_code);

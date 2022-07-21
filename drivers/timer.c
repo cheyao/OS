@@ -1,36 +1,41 @@
-#include "timer.h"
-#include "../kernel/functions.h"
-#include "../cpu/isr.h"
-#include "../cpu/idt.h"
-#include "ports.h"
+#include "drivers/timer.h"
+#include "kernel/functions.h"
+#include "cpu/isr.h"
+#include "cpu/idt.h"
+#include "drivers/ports.h"
 
 u32int tick;
 u32int time;
-void clock();
+
+void update_clock();
 
 void timer_callback(u8int int_no) {
     tick++;
     UNUSED(int_no);
     if (tick % 60 == 0) {
-        clock();
+        update_clock();
     }
 }
 
-void clock() {
+// Updates the clock (Increases the time and prints it)
+void update_clock() {
     time++;
-    char* time_ascii = "00:00";
-    time_ascii[4] = '0' + time % 10; // 02 % 10 = 2
-    time_ascii[3] = '0' + time % 60 / 10;
-    time_ascii[1] = '0' + time / 60 % 10;
-    time_ascii[0] = '0' + time / 60 / 10;
-    kprint_at(time_ascii, 75, 0);
+
+    print_time(75, 0);
 }
 
-void timer_wait(u32int ticks) {
-    u32int eticks;
+// For printing to the top right, use col = 75, row = 0
+// For printing to the cursor, use col = -1, row = -1
+void print_time(int col, int row) {
+    char* time_ascii = "00:00";
 
-    eticks = tick + ticks;
-    while(tick < eticks);
+    time_ascii[4] = (char) ('0' + time % 10);
+    time_ascii[3] = (char) ('0' + time % 60 / 10);
+    time_ascii[1] = (char) ('0' + time / 60 % 10);
+    time_ascii[0] = (char) ('0' + time / 60 / 10);
+
+    if (col < 0 || row < 0) kprint(time_ascii);
+    else kprint_at(time_ascii, col, row);
 }
 
 void init_timer(u32int freq) {

@@ -1,7 +1,7 @@
 #ifndef OS_IDT_H
 #define OS_IDT_H
 
-#include "../kernel/types.h"
+#include "kernel/types.h"
 
 typedef struct {
     u16int limit;           // Limit (8 * 32 - 1)
