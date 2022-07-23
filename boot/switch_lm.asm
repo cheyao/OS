@@ -1,13 +1,13 @@
 [bits 32]
 
 switch_lm:
-    ; check A10 Line
+    ; check A20 Line
     pushad
     mov edi,0x112345  ;odd megabyte address.
     mov esi,0x012345  ;even megabyte address.
-    mov [esi],esi     ;making sure that both addresses contain diffrent values.
+    mov [esi],esi     ;making sure that both addresses contain different values.
     mov [edi],edi     ;(if A20 line is cleared the two pointers would point to the address 0x012345 that would contain 0x112345 (edi))
-    cmpsd             ;compare addresses to see if the're equivalent.
+    cmpsd             ;compare addresses to see if there equivalent.
     popad
 
     jne enable_paging        ;if not equivalent , A20 line is set.
@@ -15,6 +15,8 @@ switch_lm:
     in al, 0x92
     or al, 2
     out 0x92, al
+
+    jmp switch_lm
 
 enable_paging:
     mov edi, PAGING_OFFSET    ; Set the destination index to 0x1000.
@@ -25,11 +27,11 @@ enable_paging:
     mov edi, cr3              ; Set the destination index to control register 3.
 
     ; Make PML4T, PDPT, PDT and PT
-    mov DWORD [edi], 0x000C8FFF      ; Set the uint32_t at the destination index to 0x2003.
+    mov DWORD [edi], 0x000C9000      ; Set the uint32_t at the destination index to 0x2003.
     add edi, 0x1000                  ; Add 0x1000 to the destination index.
-    mov DWORD [edi], 0x000C9FFF      ; Set the uint32_t at the destination index to 0x3003.
+    mov DWORD [edi], 0x000CA000      ; Set the uint32_t at the destination index to 0x3003.
     add edi, 0x1000                  ; Add 0x1000 to the destination index.
-    mov DWORD [edi], 0x000CAFFF      ; Set the uint32_t at the destination index to 0x4003.
+    mov DWORD [edi], 0x000CB000      ; Set the uint32_t at the destination index to 0x4003.
     add edi, 0x1000                  ; Add 0x1000 to the destination index.
 
     ; Setup loop

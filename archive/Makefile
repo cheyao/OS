@@ -11,20 +11,20 @@ CFLAGS = -g3 -nostdlib -nostdinc -fno-builtin -fno-stack-protector -nostartfiles
 all: run
 
 # First rule is run by default
-os-image.bin: boot/bootsect.bin kernel.bin # Don't mind
-	cat $^ > output/os-image.bin # Don't mind
+os-image.bin: boot/bootsect.bin kernel.bin
+	cat $^ > output/os-image.bin
 
 # '--oformat binary' deletes all symbols as a collateral, so we don't need
 # to 'strip' them manually on this case
-kernel.bin: boot/kernel_entry.o ${OBJ} # Don't mind
-	i686-elf-ld -o $@ -Ttext 0x1000 $^ --oformat binary # Don't mind
+kernel.bin: boot/kernel_entry.o ${OBJ}
+	i686-elf-ld -o $@ -Ttext 0x1000 $^ --oformat binary
 
 # Used for debugging purposes
-kernel.elf: boot/kernel_entry.o ${OBJ} # Don't mind
-	i686-elf-ld -o $@ -Ttext 0x1000 $^ # Don't mind
+kernel.elf: boot/kernel_entry.o ${OBJ}
+	i686-elf-ld -o $@ -Ttext 0x1000 $^
 
-run: boot/bootsect.bin
-	qemu-system-x86_64 -fda boot/bootsect.bin -no-reboot -D ./log.txt -d int
+run: os-image.bin
+	qemu-system-x86_64 -fda output/os-image.bin -no-reboot -D ./log.txt -d int
 
 # Open the connection to qemu and load our kernel-object file with symbols
 debug: os-image.bin kernel.elf
@@ -38,11 +38,11 @@ clean:
 
 # Generic rules for wildcards
 # To make an object, always compile from its .c
-%.o: %.c ${HEADERS} # Don't mind
-	i686-elf-gcc ${CFLAGS} -ffreestanding -c $< -o $@ # Don't mind
+%.o: %.c ${HEADERS}
+	i686-elf-gcc ${CFLAGS} -ffreestanding -c $< -o $@
 
-%.o: %.asm # Don't mind
-	nasm $< -f elf32 -o $@ # Don't mind
+%.o: %.asm
+	nasm $< -f elf32 -o $@
 
 %.bin: %.asm
 	nasm $< -f bin -o $@

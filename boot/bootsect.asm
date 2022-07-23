@@ -1,9 +1,9 @@
 ; Identical to lesson 13's boot sector, but the %included files have new paths
 [org 0x7c00]
 KERNEL_OFFSET equ 0x00001000 ; The same one we used when linking the kernel
-PAGING_OFFSET equ 0x000C7FFF
+PAGING_OFFSET equ 0x000C8000
 ; Will change to 0xC0000000
-; Paging will land on C7FFF - just above the hardware mapped memory
+; Paging will land on C8000 - just above the hardware mapped memory
 
     mov [BOOT_DRIVE], dl ; Remember that the BIOS sets us the boot drive in 'dl' on boot
     mov bp, 0x9000

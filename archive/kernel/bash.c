@@ -1,5 +1,5 @@
-#include "kernel/bash.h"
-#include "kernel/functions.h"
+#include "bash.h"
+#include "functions.h"
 
 char parameters[256];
 char command[32];

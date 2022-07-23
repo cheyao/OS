@@ -1,6 +1,6 @@
-#include "kernel/functions.h"
-#include "drivers/ports.h"
-#include "drivers/timer.h"
+#include "functions.h"
+#include "archive/drivers/ports.h"
+#include "archive/drivers/timer.h"
 
 /* Declaration of private functions */
 int print_char(char c, int offset, char attr);

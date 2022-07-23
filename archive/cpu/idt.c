@@ -1,6 +1,6 @@
-#include "cpu/idt.h"
-#include "drivers/ports.h"
-#include "kernel/functions.h"
+#include "idt.h"
+#include "archive/drivers/ports.h"
+#include "archive/kernel/functions.h"
 
 extern void flush_idt(u32int idt);
 

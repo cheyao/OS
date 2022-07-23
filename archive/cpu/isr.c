@@ -1,6 +1,6 @@
-#include "cpu/isr.h"
-#include "kernel/functions.h"
-#include "drivers/ports.h"
+#include "isr.h"
+#include "archive/kernel/functions.h"
+#include "archive/drivers/ports.h"
 
 isr_t interrupt_handlers[256];
 

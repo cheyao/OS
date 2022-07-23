@@ -1,7 +1,7 @@
-#include "kernel/functions.h"
-#include "cpu/idt.h"
-#include "drivers/timer.h"
-#include "drivers/keyboard.h"
+#include "functions.h"
+#include "archive/cpu/idt.h"
+#include "archive/drivers/timer.h"
+#include "archive/drivers/keyboard.h"
 
 int main() {
     clear_screen();

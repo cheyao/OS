@@ -1,9 +1,9 @@
-#include "cpu/idt.h"
-#include "cpu/isr.h"
-#include "kernel/bash.h"
-#include "kernel/functions.h"
-#include "drivers/keyboard.h"
-#include "drivers/ports.h"
+#include "archive/cpu/idt.h"
+#include "archive/cpu/isr.h"
+#include "archive/kernel/bash.h"
+#include "archive/kernel/functions.h"
+#include "keyboard.h"
+#include "ports.h"
 
 #define BACKSPACE 0x0E
 #define ENTER 0x1C

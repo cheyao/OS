@@ -1,8 +1,8 @@
-#include "drivers/timer.h"
-#include "kernel/functions.h"
-#include "cpu/isr.h"
-#include "cpu/idt.h"
-#include "drivers/ports.h"
+#include "timer.h"
+#include "archive/kernel/functions.h"
+#include "archive/cpu/isr.h"
+#include "archive/cpu/idt.h"
+#include "ports.h"
 
 u32int tick;
 u32int time;
