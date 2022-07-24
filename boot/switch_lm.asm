@@ -27,11 +27,11 @@ enable_paging:
     mov edi, cr3              ; Set the destination index to control register 3.
 
     ; Make PML4T, PDPT, PDT and PT
-    mov DWORD [edi], 0x000C9000      ; Set the uint32_t at the destination index to 0x2003.
+    mov DWORD [edi], 0x000C9003      ; Set the uint32_t at the destination index to 0x2003.
     add edi, 0x1000                  ; Add 0x1000 to the destination index.
-    mov DWORD [edi], 0x000CA000      ; Set the uint32_t at the destination index to 0x3003.
+    mov DWORD [edi], 0x000CA003      ; Set the uint32_t at the destination index to 0x3003.
     add edi, 0x1000                  ; Add 0x1000 to the destination index.
-    mov DWORD [edi], 0x000CB000      ; Set the uint32_t at the destination index to 0x4003.
+    mov DWORD [edi], 0x000CB003      ; Set the uint32_t at the destination index to 0x4003.
     add edi, 0x1000                  ; Add 0x1000 to the destination index.
 
     ; Setup loop
