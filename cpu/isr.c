@@ -1,6 +1,7 @@
 #include "cpu/isr.h"
 #include "kernel/functions.h"
 #include "drivers/ports.h"
+#include "string.h"
 
 isr_t interrupt_handlers[256];
 
@@ -47,17 +48,10 @@ void int_handler(u8int int_no, u8int err_code) {
     kprint(exception_messages[int_no]);
     kprint("\n");
 
-    if (int_no == 6) {
-        loop:
-        goto loop;
-    }
-
-    if (int_no == 8) {
-        char j[5];
-        kprint(" ");
-        int_to_ascii(err_code, j);
-        kprint(j);
-    }
+    char j[5];
+    kprint("Err code: ");
+    int_to_ascii(err_code, j);
+    kprint(j);
 }
 
 void register_interrupt_handler(u8int n, isr_t handler) {

@@ -1,4 +1,4 @@
-#include "functions.h"
+#include "kernel/functions.h"
 #include "drivers/ports.h"
 #include "drivers/timer.h"
 
@@ -15,14 +15,13 @@ int max(int i, int j);
  * Print a message on the specified location
  * If col, row, are negative, we will use the current offset
  */
-void kprint_at(const char *message, int col, int row) {
+void kprint_at(char *message, int col, int row) {
     /* Set cursor if col/row are negative */
     int offset;
-    if (col >= 0 && row >= 0)
-        offset = get_offset(col, row);
-    else {
-        offset = get_cursor_offset();
-    }
+
+    if (col >= 0 && row >= 0) offset = get_offset(col, row);
+    else offset = get_cursor_offset();
+
 
     while (*message != 0x00) {
         offset = print_char(*message, offset, WHITE_ON_BLACK);
@@ -43,43 +42,27 @@ void kprint(char *message) {
     kprint_at(message, -1, -1);
 }
 
-
-/**********************************************************
- * Private kernel functions                               *
- **********************************************************/
-
-
-/**
- * Innermost print function for our kernel, directly accesses the video memory
- *
- * If 'col' and 'row' are negative, we will print at current cursor location
- * If 'attr' is zero it will use 'white on black' as default
- * Returns the offset of the next character
- * Sets the video cursor to the returned offset
- */
 int print_char(const char c, int offset, char attr) {
-    unsigned char *vid_mem = (unsigned char*) VIDEO_ADDRESS;
-    if (!attr) attr = WHITE_ON_BLACK;
-
     if (c == '\n') {
         offset = max(offset, 160) * 160 + 160;
     } else {
-        vid_mem[offset++] = c;
-        vid_mem[offset++] = attr;
+        *((char *) VIDEO_ADDRESS + offset) = c;
+        *((char *) VIDEO_ADDRESS + offset + 1) = attr;
     }
 
-    return offset;
+    return offset + 2;
 }
 
-/// Use the VGA ports to get the current cursor position
-/// 1. Ask for high byte of the cursor offset (data 14)
-/// 2. Ask for low byte (data 15)
 int get_cursor_offset() {
-    outb(REG_SCREEN_CTRL, 14);
-    int offset = inb(REG_SCREEN_DATA) << 8; /* High byte: << 8 */
-    outb(REG_SCREEN_CTRL, 15);
-    offset += inb(REG_SCREEN_DATA);
-    return offset * 2; /* Position * size of character cell */
+    outb(0x3D4, 0x0F);
+
+    u16int pos = inb(0x3D5);
+
+    outb(0x3D4, 0x0E);
+
+    pos |= ((u16int) inb(0x3D5)) << 8;
+
+    return pos * 2;
 }
 
 void set_cursor_offset(u32int offset) {
@@ -87,9 +70,9 @@ void set_cursor_offset(u32int offset) {
     offset /= 2;
 
     outb(0x3D4, 0x0F);
-    outb(0x3D5, (int) (offset & 0xFF));
+    outb(0x3D5, (u8int) (offset & 0xFF));
     outb(0x3D4, 0x0E);
-    outb(0x3D5, (int) ((offset >> 8) & 0xFF));
+    outb(0x3D5, (u8int) ((offset >> 8) & 0xFF));
 }
 
 void clear_screen() {
@@ -102,7 +85,7 @@ void clear_screen() {
         screen[i++] = WHITE_ON_BLACK;
     }
 
-    set_cursor_offset(0x00);
+    set_cursor_offset(0);
 }
 
 void scroll() {
@@ -131,11 +114,11 @@ void scroll() {
 }
 
 void enable_cursor(int cursor_start, int cursor_end) {
-    outb(0x3D4, 0x0A);
-    outb(0x3D5, (inb(0x3D5) & 0xC0) | cursor_start);
-
     outb(0x3D4, 0x0B);
     outb(0x3D5, (inb(0x3D5) & 0xE0) | cursor_end);
+
+    outb(0x3D4, 0x0A);
+    outb(0x3D5, (inb(0x3D5) & 0xC0) | cursor_start);
 }
 
 int get_offset(int col, int row) { return 2 * (row * MAX_COLS + col); }
@@ -148,41 +131,6 @@ int max(int i, int j) {
     return x;
 }
 
-/**
- * K&R implementation
- */
-void int_to_ascii(int n, char str[]) {
-    int i, sign;
-    if ((sign = n) < 0) n = -n;
-    i = 0;
-    do {
-        str[i++] = n % 10 + '0';
-    } while ((n /= 10) > 0);
-
-    if (sign < 0) str[i++] = '-';
-    str[i] = '\0';
-
-    reverse(str);
-}
-
-/* K&R */
-void reverse(char s[]) {
-    int c, i, j;
-    for (i = 0, j = strlen(s)-1; i < j; i++, j--) {
-        c = s[i];
-        s[i] = s[j];
-        s[j] = c;
-    }
-}
-
-/* K&R */
-int strlen(char s[]) {
-    int i = 0;
-    while (s[i] != '\0') ++i;
-    return i;
-}
-
-/* Deletes the item before the cursor on the screen */
 void kdel() {
     kdel_at(-1, -1);
 }
@@ -204,7 +152,7 @@ void kdel_at(int row, int col) {
 
 void append(char l[], char letter) {
     int i;
-    for (i = NULL; l[i] != NULL; i++) {}
+    for (i = NULL; l[i] != NULL; i++);
     l[i] = letter;
     i++;
     l[i] = NULL;
@@ -213,92 +161,12 @@ void append(char l[], char letter) {
 char pop(char l[]) {
     int i;
     char tmp;
-    for (i = NULL; l[i] != NULL; i++) {}
+    for (i = NULL; l[i] != NULL; i++);
+
     if (i == NULL) return NULL;
+
     i--;
     tmp = l[i];
     l[i] = NULL;
     return tmp;
-}
-
-void * memset (void *dest, int val, int len) {
-    unsigned char *d = dest;
-    while (len-- > NULL) *d++ = val;
-    return dest;
-}
-
-char * strtok(char *str, const char *delim) {
-    register char *spanp;
-    register int c, sc;
-    char *tok;
-    static char *last;
-
-
-    if (str == NULL && (str = last) == NULL)
-        return (NULL);
-
-    /*
-     * Skip (span) leading delimiters (s += strspn(s, delim), sort of).
-     */
-    cont:
-    c = *str++;
-    for (spanp = (char *)delim; (sc = *spanp++) != 0;) {
-        if (c == sc)
-            goto cont;
-    }
-
-    if (c == 0) {		/* no non-delimiter characters */
-        last = NULL;
-        return (NULL);
-    }
-    tok = str - 1;
-
-    /*
-     * Scan token (scan for delimiters: s += strcspn(s, delim), sort of).
-     * Note that delim must have one NUL; we stop if we see that, too.
-     */
-    for (;;) {
-        c = *str++;
-        spanp = (char *)delim;
-        do {
-            if ((sc = *spanp++) == c) {
-                if (c == 0)
-                    str = NULL;
-                else
-                    str[-1] = 0;
-                last = str;
-                return (tok);
-            }
-        } while (sc != 0);
-    }
-}
-
-bool strcmp(char i[], char j[]) {
-    int p = 0;
-
-    for (; i[p] != 0 && j[p] != 0; p++) if (i[p] != j[p]) return False
-
-    return True
-}
-
-bool strcasecmp(char i[], char j[]) {
-    int p = 0;
-    char t, u;
-
-    if ((i[p] == 0 && j[p] != 0) || (i[p] != 0 && j[p] == 0)) return False
-
-    for (; i[p] != 0 && j[p] != 0; p++) {
-        t = i[p];
-        u = j[p];
-        if ('A' <= i[p] && i[p] <= 'Z') {
-            t = i[p] - ('A' - 'a');
-        }
-        if ('A' <= j[p] && j[p] <= 'Z') {
-            u = i[p] - ('A' - 'a');
-        }
-
-        if (t != u) return False
-    }
-
-    return True
 }

@@ -4,6 +4,7 @@
 #include "kernel/functions.h"
 #include "drivers/keyboard.h"
 #include "drivers/ports.h"
+#include "stdmem.h"
 
 #define BACKSPACE 0x0E
 #define ENTER 0x1C

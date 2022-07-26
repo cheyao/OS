@@ -1,5 +1,7 @@
 #include "kernel/bash.h"
 #include "kernel/functions.h"
+#include "string.h"
+#include "stdmem.h"
 
 char parameters[256];
 char command[32];

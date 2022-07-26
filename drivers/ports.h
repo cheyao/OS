@@ -1,7 +1,7 @@
 #ifndef PORTS_H
 #define PORTS_H
 
-#include "kernel/types.h"
+#include "types.h"
 
 unsigned char inb (u16int port);
 void outb (u16int port, u8int data);

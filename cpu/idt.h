@@ -1,11 +1,11 @@
 #ifndef OS_IDT_H
 #define OS_IDT_H
 
-#include "kernel/types.h"
+#include "types.h"
 
 typedef struct {
-    u16int limit;           // Limit (8 * 32 - 1)
-    u32int base ;           // Base
+    u16int limit;           // Limit (16 * 32 - 1)
+    u64int base;            // Base
 } __attribute__((packed)) idtr_t;
 
 typedef struct {
@@ -13,11 +13,13 @@ typedef struct {
     u16int selector;        // 0x08
     u8int  zero;            // unused, set to 0
     u8int  type;            // gate type, dpl, and p fields
-    u16int high;            // offset bits 16..31
+    u16int middle;          // offset bits 16..31
+    u32int high;            // offset bit 32..63
+    u32int reserved;        // reserved
 } __attribute__((packed)) idt_t;
 
 void init_idt();
-void set_idt(int vector, u32int offset);
+void set_idt(int vector, u64int offset);
 
 extern void isr_0();
 extern void isr_1();

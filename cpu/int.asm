@@ -1,22 +1,22 @@
-[BITS 32]
+[BITS 64]
 [EXTERN int_handler]
 [EXTERN irq_handler]
 
 int_get:
 	call int_handler
     add esp, 8     ; deallocate the error code and the interrupt number
-    iret           ; pops CS, EIP, EFLAGS and also SS, and ESP if privilege change occurs
+    iretq          ; pops CS, EIP, EFLAGS and also SS, and ESP if privilege change occurs
 
 irq_get:
     call irq_handler
     add esp, 8
-    iret
+    iretq
 
 %macro isr_err 1
 GLOBAL isr_%1
 isr_%1:
     cli
-    push %1
+    push byte %1
     jmp int_get
 %endmacro
 
@@ -24,8 +24,8 @@ isr_%1:
 GLOBAL isr_%1
 isr_%1:
     cli
-    push 0
-    push %1
+    push byte 0
+    push byte %1
     jmp int_get
 %endmacro
 
@@ -33,8 +33,8 @@ isr_%1:
 GLOBAL irq_%1
 irq_%1:
     cli
-    push %1
-    push %2
+    push byte %1
+    push byte %2
     jmp irq_get
 %endmacro
 
@@ -87,8 +87,8 @@ irq 13, 45
 irq 14, 46
 irq 15, 47
 
-global flush_idt
+GLOBAL flush_idt
 flush_idt:
-    mov eax, [esp + 4]
-    lidt [eax]
+    mov rax, [esp + 8]
+    lidt [rax]
     ret
