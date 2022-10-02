@@ -19,4 +19,7 @@ jobs:
       
     - name: make
       run: make 
+      run: mv output/os-image.bin os-image.bin
+      run: make
+      run: comm output/os-image.bin os-image.bin > diff.txt
 
