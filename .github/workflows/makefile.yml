@@ -18,8 +18,9 @@ jobs:
       run: brew install nasm x86_64-elf-gcc x86_64-elf-binutils
       
     - name: make
-      run: make 
-      run: mv output/os-image.bin os-image.bin
-      run: make
-      run: comm output/os-image.bin os-image.bin > diff.txt
+      run: |
+           make 
+           mv output/os-image.bin os-image.bin
+           make
+           comm output/os-image.bin os-image.bin > diff.txt
 
