@@ -1,3 +1,1 @@
-# Minecraft OS
-
-I will build a Minecraft OS in this repo
+Welp this is my template OS, my other 2 projects (one paused, one in development) are all private
